@@ -1,0 +1,6 @@
+urls:
+  login: "http://10.10.1.10/login"
+
+credentials:
+  username: "admin"
+  password: "admin" 
