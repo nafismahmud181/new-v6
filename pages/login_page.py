@@ -1,6 +1,7 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
 class LoginPage:
     def __init__(self, driver):
@@ -19,4 +20,19 @@ class LoginPage:
         login_button = WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Sign in']"))
         )
-        login_button.click() 
+        login_button.click()
+        
+        # Wait for URL to change from login page
+        try:
+            WebDriverWait(self.driver, 10).until(
+                lambda driver: driver.current_url != "http://10.10.1.10/login"
+            )
+        except TimeoutException:
+            # If URL doesn't change, check for error message
+            try:
+                error_message = WebDriverWait(self.driver, 5).until(
+                    EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'alert-danger')]"))
+                )
+                raise Exception(f"Login failed: {error_message.text}")
+            except TimeoutException:
+                raise Exception("Login failed: No redirect and no error message found") 

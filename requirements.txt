@@ -1,2 +1,4 @@
 pytest
-selenium 
+selenium
+pytest-html
+python-json-logger
