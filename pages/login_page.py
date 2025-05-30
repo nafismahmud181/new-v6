@@ -22,17 +22,22 @@ class LoginPage:
         )
         login_button.click()
         
-        # Wait for URL to change from login page
+        # Wait for either URL change or error message
         try:
+            # First try to wait for URL change (successful login)
             WebDriverWait(self.driver, 10).until(
                 lambda driver: driver.current_url != "http://10.10.1.10/login"
             )
         except TimeoutException:
-            # If URL doesn't change, check for error message
+            # If URL doesn't change, check for the specific error message
             try:
                 error_message = WebDriverWait(self.driver, 5).until(
-                    EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'alert-danger')]"))
+                    EC.presence_of_element_located((By.XPATH, "//div[@class='alert-body']"))
                 )
-                raise Exception(f"Login failed: {error_message.text}")
+                error_text = error_message.text
+                if error_text:
+                    raise Exception(f"Login failed: {error_text}")
+                else:
+                    raise Exception("Login failed: Error message appeared but was empty")
             except TimeoutException:
                 raise Exception("Login failed: No redirect and no error message found") 
